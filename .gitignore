@@ -137,3 +137,17 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# system files
+.DS_Store
+Thumbs.db
+
+#VS Code folder
+.vscode/
+
+#logs
+*.log
+
+# Environment files 
+*.env
+
