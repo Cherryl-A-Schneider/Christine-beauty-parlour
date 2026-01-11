@@ -77,7 +77,3 @@ This project is licensed under the MIT License.
 
 This PWA is customized for Christine's Beauty Parlour to provide a professional, offline-capable, and installable experience for daily spa management.
 
-
-
-
-This PWA is customized for Christine's Beauty Parlour to provide a professional, offline-capable, and installable experience for daily spa management
