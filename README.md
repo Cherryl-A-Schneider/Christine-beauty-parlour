@@ -19,13 +19,14 @@ A Progressive Web App (PWA) to manage appointments, walk-ins, completed services
 
 ## 💻 Installation
 
-### Option 1: Open Locally
+   ### Option 1: Open Locally
 1. Clone or download the repository:
    ```bash
-   git clone https://github.com/YourUsername/SpaApp.git
+   git clone https://github.com/Cherryl-A-Schneider/Christine-beauty-parlour.git
+
 2. Navigate to the project folder.
 
-3. Open christines-beautyparlourmanagement.html in a modern browser (Chrome, Edge, Firefox).
+3. Open index.html in a modern browser (Chrome, Edge, Firefox).
 
 4. Use the *Install App* button in the PWA prompt to install it on your device.
 
@@ -39,7 +40,7 @@ For 24/7 access for your client, host the app on any static hosting platform:
 
 .Vercel: Great for static apps with PWA support.
 
-After hosting, your client can install it from the hosted URL as a PWA.
+After hosting, your client can install the PWA by opening the hosted index.html URL in a browser. The *Install App* button or browser PWA prompt will allow them to install it on desktop or mobile.
 
 #### ⚡ PWA Notes
 
@@ -70,9 +71,13 @@ SpaApp/
 
 # 📄 License
 
-This project is licensed under the MIT License
-.
+This project is licensed under the MIT License.
 
-## 👩‍💼 Client Ready
+# 👩‍💼 Client Ready
 
 This PWA is customized for Christine's Beauty Parlour to provide a professional, offline-capable, and installable experience for daily spa management.
+
+
+
+
+This PWA is customized for Christine's Beauty Parlour to provide a professional, offline-capable, and installable experience for daily spa management
