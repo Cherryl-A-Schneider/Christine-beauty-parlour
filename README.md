@@ -7,7 +7,7 @@ A Progressive Web App (PWA) to manage appointments, walk-ins, completed services
 ## 🌟 Features
 - **Add Bookings**: Schedule appointments with client and service details.  
 - **Manage Walk-Ins**: Record walk-in clients, payments, and service details.  
-- **Complete Bookings**: Mark bookings as completed and track payments.  
+- **Complete Bookings**: Mark bookings as completed and track payments. 
 - **Cancel/Postpone Bookings**: Manage changes to appointments.  
 - **Income Summaries**: View daily, weekly, monthly, and yearly income.  
 - **Top Services**: See the most popular services booked.  
