@@ -1,0 +1,137 @@
+:root {
+  --gold: #c9a24d;
+  --silver: #cfd4da;
+  --azure: #eaf4f8;
+  --text-dark: #f0f0f0;
+  --card-bg: rgba(20, 30, 50, 0.85);
+  --cancelled-bg: rgba(255, 0, 0, 0.15);
+  --postponed-bg: rgba(255, 255, 0, 0.15);
+}
+
+body {
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  background: radial-gradient(circle at top, #001d3d, #003566, #0a9396) no-repeat fixed;
+  background-size: cover;
+  color: var(--text-dark);
+  padding: 20px;
+  position: relative;
+  overflow: auto;
+}
+
+/* Floral / subtle background pattern */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: url('download (35).jpg') repeat; /* Fixed path */
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: -1; /* Ensure it stays behind content */
+}
+
+h1, h2, h3 {
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+
+form {
+  background: var(--card-bg);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+  margin-bottom: 20px;
+  backdrop-filter: blur(6px);
+}
+
+input, button {
+  padding: 10px;
+  margin: 6px 4px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+button {
+  background: linear-gradient(135deg, var(--gold), #b8963d);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow-x: auto;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+  margin-bottom: 40px;
+  display: block;
+  max-width: 100%; /* Added to prevent overflow issues */
+}
+
+thead {
+  background: linear-gradient(135deg, var(--gold), #b8963d);
+  color: white;
+}
+
+td, th {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  text-align: left;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status backgrounds */
+tr.cancelled {
+  background-color: var(--cancelled-bg);
+}
+tr.postponed {
+  background-color: var(--postponed-bg);
+}
+
+/* Summary section */
+#summary {
+  background: var(--card-bg);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+}
+
+/* Charts spacing */
+canvas {
+  margin-bottom: 30px;
+}
+
+/* Printable PDF / print-friendly */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  table {
+    page-break-inside: auto;
+    width: 100%;
+    border: 1px solid #000;
+  }
+  tr    { page-break-inside: avoid; page-break-after: auto; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  table button { display: none; }
+}

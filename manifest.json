@@ -1,0 +1,23 @@
+{
+  "name": "Spa Management System",
+  "short_name": "SpaApp",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#001d3d",
+  "theme_color": "#c9a24d",
+  "orientation": "portrait",
+  "scope": "./",
+  "description": "A Progressive Web App for Christine's Beauty Parlour to track appointments, walk-ins, completed services, and income reports on any device.",
+  "icons": [
+    {
+      "src": "./icons/spa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/spa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
