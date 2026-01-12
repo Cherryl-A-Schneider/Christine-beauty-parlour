@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Christine’s Beauty Parlour</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#c9a24d">
 
@@ -21,99 +22,127 @@
 </head>
 
 <body>
-  <!-- CREATE ADMIN FORM -->
-  <div id="createAdminDiv"></div>
-
-  <!-- LOGIN FORM -->
-  <div id="loginDiv"></div>
-
-  <!-- DASHBOARD -->
   <div class="content-wrapper">
-    <h1>Christine’s Beauty Parlour</h1>
 
     <!-- INSTALL BUTTON -->
     <button id="installBtn" hidden>Install App</button>
 
-    <!-- ADD BOOKING FORM -->
-    <form id="bookingForm">
-      <h2>Add Booking</h2>
-      <input type="text" id="clientName" placeholder="Client Name" required>
-      <input type="text" id="serviceName" placeholder="Service" required>
-      <input type="datetime-local" id="bookingDate" required>
-      <button type="submit">Add Booking</button>
-    </form>
-
-    <!-- WALK-IN FORM -->
-    <form id="walkInForm">
-      <h2>Add Walk-In</h2>
-      <input type="text" id="walkClient" placeholder="Client Name" required>
-      <input type="text" id="walkService" placeholder="Service" required>
-      <input type="number" id="walkTotal" placeholder="Total Amount" required>
-      <input type="number" id="walkPaid" placeholder="Amount Paid" required>
-      <button type="submit">Add Walk-In</button>
-    </form>
-
-    <!-- BOOKINGS TABLE -->
-    <h2>Bookings</h2>
-    <table id="bookingTable">
-      <thead>
-        <tr>
-          <th>Client</th>
-          <th>Service</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <!-- COMPLETED SERVICES TABLE -->
-    <h2>Completed Services</h2>
-    <table id="completedTable">
-      <thead>
-        <tr>
-          <th>Client</th>
-          <th>Service</th>
-          <th>Date</th>
-          <th>Type</th>
-          <th>Total</th>
-          <th>Paid</th>
-          <th>Unpaid</th>
-          <th>Receipt</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <!-- INCOME SUMMARIES -->
-    <h2>Income Summaries</h2>
-    <div id="summary">
-      <p>Daily Total: <span id="dailyTotal">0</span></p>
-      <p>Weekly Total: <span id="weeklyTotal">0</span></p>
-      <p>Monthly Total: <span id="monthlyTotal">0</span></p>
-      <p>Yearly Total: <span id="yearlyTotal">0</span></p>
+    <!-- LOGIN / CREATE ADMIN -->
+    <div id="loginContainer">
+      <h2>Admin Login</h2>
+      <form id="loginForm">
+        <input type="text" id="adminUsername" placeholder="Username" required>
+        <input type="password" id="adminPassword" placeholder="Password" required>
+        <label>
+          <input type="checkbox" id="rememberMe"> Remember Me
+        </label>
+        <button type="submit">Login</button>
+      </form>
+      <p id="firstTimeMsg" style="display:none;">No admin account found. Please create one.</p>
+      <form id="createAdminForm" style="display:none;">
+        <input type="text" id="newAdminUsername" placeholder="Create Username" required>
+        <input type="password" id="newAdminPassword" placeholder="Create Password" required>
+        <button type="submit">Create Admin Account</button>
+      </form>
     </div>
 
-    <!-- TOP SERVICES -->
-    <h2>Top Services</h2>
-    <ul id="topServicesList"></ul>
+    <!-- DASHBOARD -->
+    <div id="dashboard" style="display:none;">
+      <h1>Christine’s Beauty Parlour</h1>
+      <button id="logoutBtn">Logout</button>
 
-    <!-- CHARTS -->
-    <h2>Income Chart</h2>
-    <canvas id="incomeChart" width="400" height="150"></canvas>
+      <!-- ADMIN PROFILE -->
+      <div id="adminProfile">
+        <h2>Admin Profile</h2>
+        <p id="adminName"></p>
+        <input type="file" id="adminPicInput" accept="image/*">
+        <img id="adminPic" src="" alt="Profile Picture" style="width:100px;height:100px;border-radius:50%;">
+        <button id="deleteAccountBtn">Delete Account</button>
+      </div>
 
-    <h2>Top Services Chart</h2>
-    <canvas id="topServicesChart" width="400" height="150"></canvas>
+      <!-- ADD BOOKING FORM -->
+      <form id="bookingForm">
+        <h2>Add Booking</h2>
+        <input type="text" id="clientName" placeholder="Client Name" required>
+        <input type="text" id="serviceName" placeholder="Service" required>
+        <input type="datetime-local" id="bookingDate" required>
+        <button type="submit">Add Booking</button>
+      </form>
 
-    <!-- EXPORT PDF -->
-    <button id="exportPDF">Export Dashboard as PDF</button>
+      <!-- WALK-IN FORM -->
+      <form id="walkInForm">
+        <h2>Add Walk-In</h2>
+        <input type="text" id="walkClient" placeholder="Client Name" required>
+        <input type="text" id="walkService" placeholder="Service" required>
+        <input type="number" id="walkTotal" placeholder="Total Amount" required>
+        <input type="number" id="walkPaid" placeholder="Amount Paid" required>
+        <button type="submit">Add Walk-In</button>
+      </form>
+
+      <!-- BOOKINGS TABLE -->
+      <h2>Bookings</h2>
+      <table id="bookingTable">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- COMPLETED SERVICES TABLE -->
+      <h2>Completed Services</h2>
+      <table id="completedTable">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Unpaid</th>
+            <th>Receipt</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- INCOME SUMMARIES -->
+      <h2>Income Summaries</h2>
+      <div id="summary">
+        <p>Daily Total: <span id="dailyTotal">0</span></p>
+        <p>Weekly Total: <span id="weeklyTotal">0</span></p>
+        <p>Monthly Total: <span id="monthlyTotal">0</span></p>
+        <p>Yearly Total: <span id="yearlyTotal">0</span></p>
+      </div>
+
+      <!-- TOP SERVICES -->
+      <h2>Top Services</h2>
+      <ul id="topServicesList"></ul>
+
+      <!-- CHARTS -->
+      <h2>Income Chart</h2>
+      <canvas id="incomeChart" width="400" height="150"></canvas>
+
+      <h2>Top Services Chart</h2>
+      <canvas id="topServicesChart" width="400" height="150"></canvas>
+
+      <!-- EXPORT PDF -->
+      <button id="exportPDF">Export Dashboard as PDF</button>
+
+    </div>
+
   </div>
 
   <!-- Main App Script -->
   <script src="./app.js"></script>
 
-  <!-- Service Worker Registration & PWA Install -->
+  <!-- Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -131,7 +160,6 @@
       deferredPrompt = e;
       installBtn.hidden = false;
     });
-
     installBtn.addEventListener('click', () => {
       installBtn.hidden = true;
       if (deferredPrompt) {
