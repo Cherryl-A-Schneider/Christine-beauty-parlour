@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Christine’s Beauty Parlour</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#c9a24d">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Favicon -->
+  <link rel="icon" href="./icons/spa-icon-192.png" type="image/png">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="./style.css">
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+  <div class="content-wrapper">
+    <h1>Christine’s Beauty Parlour</h1>
+
+    <!-- INSTALL BUTTON -->
+    <button id="installBtn" hidden>Install App</button>
+
+    <!-- ADD BOOKING FORM -->
+    <form id="bookingForm">
+      <h2>Add Booking</h2>
+      <input type="text" id="clientName" placeholder="Client Name" required>
+      <input type="text" id="serviceName" placeholder="Service" required>
+      <input type="datetime-local" id="bookingDate" required>
+      <button type="submit">Add Booking</button>
+    </form>
+
+    <!-- WALK-IN FORM -->
+    <form id="walkInForm">
+      <h2>Add Walk-In</h2>
+      <input type="text" id="walkClient" placeholder="Client Name" required>
+      <input type="text" id="walkService" placeholder="Service" required>
+      <input type="number" id="walkTotal" placeholder="Total Amount" required>
+      <input type="number" id="walkPaid" placeholder="Amount Paid" required>
+      <button type="submit">Add Walk-In</button>
+    </form>
+
+    <!-- BOOKINGS TABLE -->
+    <h2>Bookings</h2>
+    <table id="bookingTable">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Service</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- COMPLETED SERVICES -->
+    <h2>Completed Services</h2>
+    <table id="completedTable">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Service</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Total</th>
+          <th>Paid</th>
+          <th>Unpaid</th>
+          <th>Receipt</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- INCOME SUMMARY -->
+    <h2>Income Summary</h2>
+    <div id="summary">
+      <p>Daily Total: <span id="dailyTotal">0</span></p>
+      <p>Weekly Total: <span id="weeklyTotal">0</span></p>
+      <p>Monthly Total: <span id="monthlyTotal">0</span></p>
+      <p>Yearly Total: <span id="yearlyTotal">0</span></p>
+    </div>
+
+    <!-- TOP SERVICES -->
+    <h2>Top Services</h2>
+    <ul id="topServicesList"></ul>
+
+    <!-- CHARTS -->
+    <h2>Income Chart</h2>
+    <canvas id="incomeChart" height="150"></canvas>
+
+    <h2>Top Services Chart</h2>
+    <canvas id="topServicesChart" height="150"></canvas>
+
+    <!-- EXPORT -->
+    <button id="exportPDF">Export Dashboard as PDF</button>
+  </div>
+
+  <!-- APP SCRIPT -->
+  <script src="./app.js"></script>
+
+  <!-- SERVICE WORKER + INSTALL -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.error('Service Worker failed:', err));
+      });
+    }
+
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.hidden = false;
+    });
+
+    installBtn.addEventListener('click', () => {
+      installBtn.hidden = true;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(() => deferredPrompt = null);
+    });
+  </script>
+</body>
+</html>
