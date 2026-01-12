@@ -1,58 +1,44 @@
-const cacheName = "spa-app-cache-v2"; // updated cache version
+const cacheName = 'spa-app-cache-v2';
 const assetsToCache = [
-  "./",
-  "./index.html",
-  "./style.css",
-  "./app.js",
-  "./manifest.json",
-  "./icons/spa-icon-192.png",
-  "./icons/spa-icon-512.png"
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './manifest.json',
+  './icons/spa-icon-192.png',
+  './icons/spa-icon-512.png'
 ];
 
-// Install Event - cache all assets
-self.addEventListener("install", event => {
-  console.log("Service Worker installing...");
+// INSTALL SERVICE WORKER & CACHE ASSETS
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(cacheName).then(cache => {
-      console.log("Caching app assets...");
-      return cache.addAll(assetsToCache);
-    })
+    caches.open(cacheName).then(cache => cache.addAll(assetsToCache))
   );
+  self.skipWaiting();
 });
 
-// Activate Event - cleanup old caches
-self.addEventListener("activate", event => {
-  console.log("Service Worker activating...");
+// ACTIVATE SERVICE WORKER & CLEAN OLD CACHE
+self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys.map(key => {
-          if (key !== cacheName) {
-            console.log("Removing old cache:", key);
-            return caches.delete(key);
-          }
+          if (key !== cacheName) return caches.delete(key);
         })
       );
     })
   );
-  return self.clients.claim();
+  self.clients.claim();
 });
 
-// Fetch Event - respond with cache first, then network
-self.addEventListener("fetch", event => {
+// FETCH: SERVE FROM CACHE, FALLBACK TO NETWORK
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) return cachedResponse;
-      return fetch(event.request).then(networkResponse => {
-        // Optional: cache new requests dynamically
-        return caches.open(cacheName).then(cache => {
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
-        });
-      }).catch(() => {
-        // Optional fallback if offline and asset not cached
-        if (event.request.mode === "navigate") {
-          return caches.match("./index.html");
+    caches.match(event.request).then(cached => {
+      return cached || fetch(event.request).catch(() => {
+        // Optional: fallback for offline
+        if (event.request.destination === 'document') {
+          return caches.match('./index.html');
         }
       });
     })
