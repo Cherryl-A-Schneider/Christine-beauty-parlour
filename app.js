@@ -1,141 +1,16 @@
-/* ===========================================
-   ADMIN ACCOUNT & LOGIN SYSTEM
-=========================================== */
-let admin = JSON.parse(localStorage.getItem("admin")) || null;
-let isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn")) || false;
-
-// DOM Elements
-const body = document.body;
-
-// Create containers for forms
-const createAdminDiv = document.createElement("div");
-const loginDiv = document.createElement("div");
-
-// ===== CREATE ADMIN FORM =====
-createAdminDiv.innerHTML = `
-  <h2>Create Admin Account</h2>
-  <input type="text" id="newAdminUsername" placeholder="Username" required>
-  <input type="password" id="newAdminPassword" placeholder="Password" required>
-  <button id="createAdminBtn">Create Account</button>
-`;
-
-body.prepend(createAdminDiv);
-
-// ===== LOGIN FORM =====
-loginDiv.innerHTML = `
-  <h2>Admin Login</h2>
-  <input type="text" id="loginUsername" placeholder="Username" required>
-  <input type="password" id="loginPassword" placeholder="Password" required>
-  <label>
-    <input type="checkbox" id="rememberMe"> Remember Me
-  </label>
-  <button id="loginBtn">Login</button>
-`;
-
-body.prepend(loginDiv);
-
-// Hide dashboard content until login
-const dashboardContent = document.querySelector(".content-wrapper");
-dashboardContent.style.display = "none";
-
-// Function to show dashboard
-function showDashboard() {
-  createAdminDiv.style.display = "none";
-  loginDiv.style.display = "none";
-  dashboardContent.style.display = "block";
-}
-
-// Function to show login
-function showLogin() {
-  createAdminDiv.style.display = "none";
-  loginDiv.style.display = "block";
-  dashboardContent.style.display = "none";
-}
-
-// Function to show create admin
-function showCreateAdmin() {
-  createAdminDiv.style.display = "block";
-  loginDiv.style.display = "none";
-  dashboardContent.style.display = "none";
-}
-
-// ===== INIT LOGIN FLOW =====
-if (!admin) {
-  // No admin yet, show create admin form
-  showCreateAdmin();
-} else if (isLoggedIn) {
-  showDashboard();
-} else {
-  showLogin();
-}
-
-/* ===== CREATE ADMIN EVENT ===== */
-document.getElementById("createAdminBtn").addEventListener("click", () => {
-  const username = document.getElementById("newAdminUsername").value.trim();
-  const password = document.getElementById("newAdminPassword").value.trim();
-
-  if (!username || !password) {
-    alert("Please fill out both fields.");
-    return;
-  }
-
-  // Save admin account
-  admin = { username, password };
-  localStorage.setItem("admin", JSON.stringify(admin));
-  localStorage.setItem("isLoggedIn", true);
-  alert("Admin account created successfully!");
-  showDashboard();
-});
-
-/* ===== LOGIN EVENT ===== */
-document.getElementById("loginBtn").addEventListener("click", () => {
-  const username = document.getElementById("loginUsername").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
-  const remember = document.getElementById("rememberMe").checked;
-
-  if (!username || !password) {
-    alert("Please fill out both fields.");
-    return;
-  }
-
-  if (admin && username === admin.username && password === admin.password) {
-    localStorage.setItem("isLoggedIn", remember ? true : false);
-    showDashboard();
-    alert("Login successful!");
-  } else {
-    alert("Incorrect username or password.");
-  }
-});
-
-/* ===== LOGOUT FUNCTION ===== */
-function logout() {
-  localStorage.setItem("isLoggedIn", false);
-  showLogin();
-}
-
-/* Add a logout button dynamically */
-const logoutBtn = document.createElement("button");
-logoutBtn.innerText = "Logout";
-logoutBtn.style.position = "fixed";
-logoutBtn.style.top = "10px";
-logoutBtn.style.right = "10px";
-logoutBtn.addEventListener("click", logout);
-dashboardContent.prepend(logoutBtn);
-
-
-/* ===========================================
-   SPA MANAGEMENT LOGIC (Bookings, Walk-ins, Charts, PDF)
-=========================================== */
+/* ===== STORAGE ===== */
 let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
 let completedServices = JSON.parse(localStorage.getItem("completedServices")) || [];
+let admin = JSON.parse(localStorage.getItem("admin")) || null;
 
-/* ===== STORAGE ===== */
+/* ===== SAVE DATA ===== */
 function saveData() {
   localStorage.setItem("bookings", JSON.stringify(bookings));
   localStorage.setItem("completedServices", JSON.stringify(completedServices));
+  localStorage.setItem("admin", JSON.stringify(admin));
 }
 
-/* ===== HELPERS ===== */
+/* ===== HELPER FUNCTIONS ===== */
 function parseDate(dateStr) { return new Date(dateStr); }
 function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -144,6 +19,105 @@ function getWeekNumber(date) {
   const yearStart = new Date(Date.UTC(d.getFullYear(),0,1));
   return Math.ceil((((d - yearStart)/86400000)+1)/7);
 }
+function sum(obj){ return Object.values(obj).reduce((a,b)=>a+b,0); }
+
+/* ===== LOGIN / ADMIN SYSTEM ===== */
+const loginContainer = document.getElementById("loginContainer");
+const dashboard = document.getElementById("dashboard");
+const loginForm = document.getElementById("loginForm");
+const createAdminForm = document.getElementById("createAdminForm");
+const firstTimeMsg = document.getElementById("firstTimeMsg");
+const rememberMe = document.getElementById("rememberMe");
+const profilePicInput = document.getElementById("profilePicInput");
+const profilePicDisplay = document.getElementById("profilePicDisplay");
+const logoutBtn = document.getElementById("logoutBtn");
+const deleteAdminBtn = document.getElementById("deleteAdminBtn");
+
+function showDashboard() {
+  loginContainer.style.display = "none";
+  dashboard.style.display = "block";
+  renderProfile();
+  renderBookings();
+  renderCompletedServices();
+  updateSummaries();
+  renderTopServices();
+  drawIncomeChart();
+  drawTopServicesChart();
+}
+
+function renderProfile() {
+  if(admin && admin.picture) profilePicDisplay.src = admin.picture;
+}
+
+function checkLogin() {
+  const saved = localStorage.getItem("rememberedAdmin");
+  if(saved) {
+    admin = JSON.parse(saved);
+    showDashboard();
+  } else if(!admin) {
+    createAdminForm.style.display = "block";
+    firstTimeMsg.style.display = "block";
+  } else {
+    loginContainer.style.display = "block";
+  }
+}
+
+/* ===== ADMIN CREATION ===== */
+createAdminForm.addEventListener("submit", e=>{
+  e.preventDefault();
+  const username = document.getElementById("createUsername").value;
+  const password = document.getElementById("createPassword").value;
+  if(!username || !password) return alert("Fill both fields");
+  admin = {username, password, picture: ""};
+  saveData();
+  alert("Admin account created!");
+  showDashboard();
+});
+
+/* ===== LOGIN ===== */
+loginForm.addEventListener("submit", e=>{
+  e.preventDefault();
+  const username = document.getElementById("loginUsername").value;
+  const password = document.getElementById("loginPassword").value;
+  if(!admin) return alert("No admin account exists. Create one first.");
+  if(username===admin.username && password===admin.password){
+    if(rememberMe.checked) localStorage.setItem("rememberedAdmin", JSON.stringify(admin));
+    showDashboard();
+  } else {
+    alert("Incorrect credentials!");
+  }
+});
+
+/* ===== LOGOUT ===== */
+logoutBtn.addEventListener("click", ()=>{
+  localStorage.removeItem("rememberedAdmin");
+  dashboard.style.display = "none";
+  loginContainer.style.display = "block";
+});
+
+/* ===== DELETE ADMIN ===== */
+deleteAdminBtn.addEventListener("click", ()=>{
+  if(confirm("Delete admin account? All records will remain.")){
+    localStorage.removeItem("admin");
+    localStorage.removeItem("rememberedAdmin");
+    admin = null;
+    dashboard.style.display = "none";
+    loginContainer.style.display = "block";
+  }
+});
+
+/* ===== PROFILE PIC UPLOAD ===== */
+profilePicInput.addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    admin.picture = reader.result;
+    saveData();
+    renderProfile();
+  };
+  reader.readAsDataURL(file);
+});
 
 /* ===== BOOKINGS ===== */
 function addBooking(client, service, date){
@@ -152,19 +126,19 @@ function addBooking(client, service, date){
   renderBookings();
 }
 
-/* ===== BOOKING STATUS ===== */
 function completeBookingPrompt(id){
   const total = prompt("Enter total amount:");
   if(total===null) return;
   const paid = prompt("Enter amount paid:");
   if(paid===null) return;
-  completeBooking(id, total, paid);
+  const notes = prompt("Optional notes:");
+  completeBooking(id, total, paid, notes);
 }
 
-function completeBooking(id, total, paid){
+function completeBooking(id, total, paid, notes){
   const index = bookings.findIndex(b=>b.id===id);
   if(index===-1) return;
-  saveCompletedService(bookings[index].client, bookings[index].service, bookings[index].date, total, paid, "Booking");
+  saveCompletedService(bookings[index].client, bookings[index].service, bookings[index].date, total, paid, "Booking", notes);
   bookings.splice(index,1);
   saveData();
   renderBookings();
@@ -183,10 +157,8 @@ function cancelBooking(id){
 function postponeBooking(id){
   const index = bookings.findIndex(b => b.id === id);
   if(index === -1) return;
-
   const newDate = prompt("Enter new date & time (YYYY-MM-DD HH:MM):");
   if(!newDate) return;
-
   bookings[index].date = newDate;
   bookings[index].status = "Postponed";
   saveData();
@@ -195,12 +167,12 @@ function postponeBooking(id){
 }
 
 /* ===== WALK-IN ===== */
-function addWalkIn(client, service, total, paid){
-  saveCompletedService(client, service, new Date().toISOString().split("T")[0], total, paid, "Walk-in");
+function addWalkIn(client, service, total, paid, notes=""){
+  saveCompletedService(client, service, new Date().toISOString().split("T")[0], total, paid, "Walk-in", notes);
 }
 
 /* ===== COMPLETED SERVICES ===== */
-function saveCompletedService(client, service, date, total, paid, type){
+function saveCompletedService(client, service, date, total, paid, type, notes=""){
   const totalAmount = Number(total) || 0;
   const amountPaid = Number(paid) || 0;
   completedServices.push({
@@ -210,7 +182,8 @@ function saveCompletedService(client, service, date, total, paid, type){
     type,
     totalAmount,
     amountPaid,
-    unpaidAmount: Math.max(0, totalAmount - amountPaid)
+    unpaidAmount: Math.max(0, totalAmount - amountPaid),
+    notes
   });
   saveData();
   renderCompletedServices();
@@ -226,7 +199,6 @@ function renderBookings(){
   table.innerHTML="";
   bookings.forEach(b=>{
     const row = document.createElement("tr");
-
     row.innerHTML=`
       <td>${b.client}</td>
       <td>${b.service}</td>
@@ -257,6 +229,7 @@ function renderCompletedServices(){
       <td>${s.totalAmount}</td>
       <td>${s.amountPaid}</td>
       <td>${s.unpaidAmount}</td>
+      <td>${s.notes || ""}</td>
       <td><button onclick='generateReceipt(${JSON.stringify(s)})'>Receipt</button></td>
     `;
     table.appendChild(row);
@@ -278,7 +251,6 @@ function updateSummaries(){
   document.getElementById("monthlyTotal").innerText=sum(monthly);
   document.getElementById("yearlyTotal").innerText=sum(yearly);
 }
-function sum(obj){ return Object.values(obj).reduce((a,b)=>a+b,0); }
 
 /* ===== TOP SERVICES ===== */
 function getTopServices(period="all"){
@@ -306,10 +278,7 @@ function drawIncomeChart(){
   if(incomeChart) incomeChart.destroy();
   incomeChart = new Chart(ctx,{
     type:'line',
-    data:{
-      labels: labels,
-      datasets:[{label:'Income', data:data, borderColor:'gold', backgroundColor:'rgba(255,215,0,0.2)'}]
-    }
+    data:{ labels, datasets:[{label:'Income', data:data, borderColor:'gold', backgroundColor:'rgba(255,215,0,0.2)'}]}
   });
 }
 
@@ -319,10 +288,7 @@ function drawTopServicesChart(){
   if(topServicesChart) topServicesChart.destroy();
   topServicesChart = new Chart(ctx,{
     type:'bar',
-    data:{
-      labels: top.map(s=>s[0]),
-      datasets:[{label:'Bookings', data: top.map(s=>s[1]), backgroundColor:'silver'}]
-    }
+    data:{ labels: top.map(s=>s[0]), datasets:[{label:'Bookings', data: top.map(s=>s[1]), backgroundColor:'silver'}]}
   });
 }
 
@@ -337,6 +303,7 @@ function generateReceipt(service){
   <p>Total: ${service.totalAmount}</p>
   <p>Paid: ${service.amountPaid}</p>
   <p>Unpaid: ${service.unpaidAmount}</p>
+  <p>Notes: ${service.notes || ""}</p>
   <script>window.print();</script>`);
 }
 
@@ -344,22 +311,14 @@ function generateReceipt(service){
 document.getElementById("exportPDF").addEventListener("click", () => {
   const element = document.querySelector(".content-wrapper");
   const opt = {
-    margin:       0.5,
-    filename:     `Spa_Report_${new Date().toISOString().split("T")[0]}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    margin: 0.5,
+    filename: `Spa_Report_${new Date().toISOString().split("T")[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   };
   html2pdf().set(opt).from(element).save();
 });
-
-/* ===== INIT DASHBOARD ===== */
-renderBookings();
-renderCompletedServices();
-updateSummaries();
-renderTopServices();
-drawIncomeChart();
-drawTopServicesChart();
 
 /* ===== FORM SUBMISSIONS ===== */
 document.getElementById("bookingForm").addEventListener("submit", e=>{
@@ -382,3 +341,6 @@ document.getElementById("walkInForm").addEventListener("submit", e=>{
   );
   e.target.reset();
 });
+
+/* ===== INIT ===== */
+checkLogin();
