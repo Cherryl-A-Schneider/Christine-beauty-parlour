@@ -1,137 +1,189 @@
-:root {
-  --gold: #c9a24d;
-  --silver: #cfd4da;
-  --azure: #eaf4f8;
-  --text-dark: #f0f0f0;
-  --card-bg: rgba(20, 30, 50, 0.85);
-  --cancelled-bg: rgba(255, 0, 0, 0.15);
-  --postponed-bg: rgba(255, 255, 0, 0.15);
-}
-
+/* ===== GENERAL STYLES ===== */
 body {
-  font-family: 'Segoe UI', 'Roboto', sans-serif;
-  background: radial-gradient(circle at top, #001d3d, #003566, #0a9396) no-repeat fixed;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  background: radial-gradient(circle at 20% 20%, #0b3d91, #090a0f 80%);
   background-size: cover;
-  color: var(--text-dark);
-  padding: 20px;
-  position: relative;
-  overflow: auto;
+  overflow-x: hidden;
 }
 
-/* Floral / subtle background pattern */
-body::before {
-  content: '';
-  position: absolute;
+/* Animated galaxy effect */
+body::after {
+  content: "";
+  position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: url('download (35).jpg') repeat; /* Fixed path */
-  opacity: 0.25;
+  background: url('DOWNLOAD\ 125+\ Best\ Purple\ iPhone\ Wallpapers\ \(Free\ 4k\ HD\ Download\).jpg') repeat;
+  opacity: 0.4;
+  z-index: 0;
   pointer-events: none;
-  z-index: -1; /* Ensure it stays behind content */
+  animation: starTwinkle 60s linear infinite;
 }
 
-h1, h2, h3 {
-  color: var(--gold);
-  letter-spacing: 0.5px;
+@keyframes starTwinkle {
+  0% { background-position: 0 0; }
+  100% { background-position: 1000px 1000px; }
 }
 
+h1, h2 {
+  color: #ffdfba;
+  text-align: center;
+  z-index: 1;
+  position: relative;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== FORMS ===== */
 form {
-  background: var(--card-bg);
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 20px;
-  backdrop-filter: blur(6px);
+  justify-content: center;
 }
 
-input, button {
+form input, form button {
   padding: 10px;
-  margin: 6px 4px;
-  border-radius: 8px;
+  font-size: 16px;
+  border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-input:focus {
-  outline: none;
-  border-color: var(--gold);
-}
-
-button {
-  background: linear-gradient(135deg, var(--gold), #b8963d);
+form button {
+  background-color: #c9a24d;
   color: white;
   border: none;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: 0.2s;
 }
 
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+form button:hover {
+  background-color: #a57e35;
 }
 
+/* ===== TABLES ===== */
 table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--card-bg);
-  border-radius: 12px;
-  overflow-x: auto;
-  box-shadow: 0 6px 25px rgba(0,0,0,0.5);
-  margin-bottom: 40px;
-  display: block;
-  max-width: 100%; /* Added to prevent overflow issues */
+  margin-bottom: 30px;
+  font-size: 14px;
+  z-index: 1;
+  position: relative;
 }
 
-thead {
-  background: linear-gradient(135deg, var(--gold), #b8963d);
+table thead tr {
+  background-color: #c9a24d;
   color: white;
 }
 
-td, th {
-  padding: 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  text-align: left;
+table th, table td {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  vertical-align: top;
+  color: #fff;
 }
 
-tr:last-child td {
-  border-bottom: none;
+table tr.cancelled {
+  background-color: rgba(255,0,0,0.1);
 }
 
-/* Status backgrounds */
-tr.cancelled {
-  background-color: var(--cancelled-bg);
-}
-tr.postponed {
-  background-color: var(--postponed-bg);
+table tr.postponed {
+  background-color: rgba(255,255,0,0.1);
 }
 
-/* Summary section */
+/* ===== PAYMENTS & NOTES ===== */
+.payment-list, .note-list {
+  max-height: 60px;
+  overflow-y: auto;
+  padding-left: 15px;
+}
+
+.payment-list li, .note-list li {
+  margin-bottom: 2px;
+}
+
+/* ===== BUTTONS IN TABLE ===== */
+table button {
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 2px;
+}
+
+table button.complete { background-color: #28a745; color: white; }
+table button.cancel { background-color: #dc3545; color: white; }
+table button.add-payment { background-color: #ffc107; color: #333; }
+table button.receipt { background-color: #17a2b8; color: white; }
+
+/* ===== SUMMARIES & CHARTS ===== */
 #summary {
-  background: var(--card-bg);
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 6px 25px rgba(0,0,0,0.5);
-  font-weight: 600;
-  backdrop-filter: blur(6px);
-}
-
-/* Charts spacing */
-canvas {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
   margin-bottom: 30px;
 }
 
-/* Printable PDF / print-friendly */
-@media print {
-  body {
-    background: white !important;
-    color: black !important;
-  }
-  table {
-    page-break-inside: auto;
-    width: 100%;
-    border: 1px solid #000;
-  }
-  tr    { page-break-inside: avoid; page-break-after: auto; }
-  thead { display: table-header-group; }
-  tfoot { display: table-footer-group; }
-  table button { display: none; }
+#summary p {
+  background-color: rgba(255,255,255,0.1);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin: 5px;
+  font-weight: bold;
+}
+
+/* ===== EXPORT PDF BUTTON ===== */
+#exportPDF {
+  display: block;
+  margin: 20px auto;
+  padding: 12px 25px;
+  background-color: #5a2a83;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#exportPDF:hover { background-color: #431f62; }
+
+/* ===== INSTALL BUTTON ===== */
+#installBtn {
+  display: block;
+  margin: 15px auto;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#installBtn:hover { background-color: #1e7e34; }
+
+/* ===== ADD IMAGES ===== */
+.hero-image {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  table, .content-wrapper { font-size: 12px; }
+  form input, form button { flex: 1 1 100%; }
 }
