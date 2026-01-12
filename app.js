@@ -1,156 +1,159 @@
-/* =====================
-   ===== STORAGE =====
-===================== */
+/* ===== STORAGE ===== */
 let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
 let completedServices = JSON.parse(localStorage.getItem("completedServices")) || [];
-let admin = JSON.parse(localStorage.getItem("admin")) || null;
+let admins = JSON.parse(localStorage.getItem("admins")) || [];
 
-/* =====================
-   ===== HELPERS =====
-===================== */
+/* ===== STORAGE HELPERS ===== */
 function saveData() {
   localStorage.setItem("bookings", JSON.stringify(bookings));
   localStorage.setItem("completedServices", JSON.stringify(completedServices));
-  if(admin) localStorage.setItem("admin", JSON.stringify(admin));
-}
-function parseDate(dateStr){ return new Date(dateStr); }
-function getWeekNumber(date){
-  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
-  const dayNum=d.getUTCDay()||7;
-  d.setUTCDate(d.getUTCDate()+4-dayNum);
-  const yearStart=new Date(Date.UTC(d.getFullYear(),0,1));
-  return Math.ceil((((d-yearStart)/86400000)+1)/7);
+  localStorage.setItem("admins", JSON.stringify(admins));
 }
 
-/* =====================
-   ===== ADMIN LOGIN =====
-===================== */
-const loginForm = document.getElementById("loginForm");
-const loginContainer = document.getElementById("loginContainer");
-const dashboard = document.getElementById("dashboard");
-const profileContainer = document.getElementById("profileContainer");
-const adminNameDisplay = document.getElementById("adminNameDisplay");
-const logoutBtn = document.getElementById("logoutBtn");
-const deleteAccountBtn = document.getElementById("deleteAccountBtn");
-const rememberMe = document.getElementById("rememberMe");
-
-function showDashboard(){
-  loginContainer.hidden = true;
-  profileContainer.hidden = false;
-  dashboard.hidden = false;
-  adminNameDisplay.innerText = admin.username;
-  renderBookings();
-  renderCompletedServices();
-  updateSummaries();
-  renderTopServices();
-  drawIncomeChart();
-  drawTopServicesChart();
+/* ===== DATE HELPERS ===== */
+function parseDate(dateStr) { return new Date(dateStr); }
+function getWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getFullYear(),0,1));
+  return Math.ceil((((d - yearStart)/86400000)+1)/7);
 }
 
-function logoutAdmin(){
-  if(!rememberMe.checked) admin = null;
+/* ===== ADMIN AUTH ===== */
+function createAdmin(username, password) {
+  if (admins.find(a => a.username === username)) return false;
+  admins.push({username, password});
   saveData();
-  loginContainer.hidden = false;
-  profileContainer.hidden = true;
-  dashboard.hidden = true;
+  return true;
 }
 
-function deleteAdminAccount(){
-  if(confirm("Are you sure you want to delete the admin account? This will log you out but keep all booking data.")){
-    admin = null;
-    localStorage.removeItem("admin");
-    logoutAdmin();
-    alert("Admin account deleted.");
+function loginAdmin(username, password, remember=false) {
+  const admin = admins.find(a => a.username === username && a.password === password);
+  if (admin) {
+    localStorage.setItem("loggedAdmin", JSON.stringify({username, remember}));
+    showDashboard();
+    return true;
   }
+  return false;
 }
 
-// Check for saved admin session
-if(admin) showDashboard();
+function logoutAdmin() {
+  localStorage.removeItem("loggedAdmin");
+  document.getElementById("loginContainer").hidden = false;
+  document.getElementById("dashboard").hidden = true;
+  document.getElementById("profileContainer").hidden = true;
+}
 
-// Login form submission
-loginForm.addEventListener("submit", e=>{
-  e.preventDefault();
-  const username = document.getElementById("adminUsername").value;
-  const password = document.getElementById("adminPassword").value;
+function deleteAdminAccount() {
+  const logged = JSON.parse(localStorage.getItem("loggedAdmin"));
+  if (!logged) return;
+  const index = admins.findIndex(a => a.username === logged.username);
+  if (index !== -1) admins.splice(index,1);
+  saveData();
+  logoutAdmin();
+}
 
-  if(!admin){ 
-    // Create default admin if none exists
-    admin = {username,password};
-    saveData();
-    alert("Admin account created.");
-  } else if(admin.username===username && admin.password===password){
-    // Correct login
-  } else {
-    alert("Invalid credentials!");
-    return;
-  }
+/* ===== DASHBOARD SHOW/HIDE ===== */
+function showDashboard() {
+  const logged = JSON.parse(localStorage.getItem("loggedAdmin"));
+  if (!logged) return;
+  document.getElementById("loginContainer").hidden = true;
+  document.getElementById("dashboard").hidden = false;
+  document.getElementById("profileContainer").hidden = false;
+  document.getElementById("adminNameDisplay").innerText = logged.username;
+}
 
-  showDashboard();
-  loginForm.reset();
-});
-
-// Logout & delete buttons
-logoutBtn.addEventListener("click", logoutAdmin);
-deleteAccountBtn.addEventListener("click", deleteAdminAccount);
-
-/* =====================
-   ===== BOOKINGS =====
-===================== */
-function addBooking(client, service, date){
-  bookings.push({id: Date.now(), client, service, date, status:"Active"});
+/* ===== BOOKINGS ===== */
+function addBooking(client, service, date, notes="") {
+  bookings.push({
+    id: Date.now(),
+    client,
+    service,
+    date,
+    status: "Active",
+    notes
+  });
   saveData();
   renderBookings();
 }
-function completeBookingPrompt(id){
+
+function editBooking(id) {
+  const booking = bookings.find(b => b.id === id);
+  if (!booking) return;
+  const newClient = prompt("Edit client name:", booking.client) || booking.client;
+  const newService = prompt("Edit service:", booking.service) || booking.service;
+  const newDate = prompt("Edit date & time (YYYY-MM-DD HH:MM):", booking.date) || booking.date;
+  const newNotes = prompt("Edit notes:", booking.notes) || booking.notes;
+  booking.client = newClient;
+  booking.service = newService;
+  booking.date = newDate;
+  booking.notes = newNotes;
+  saveData();
+  renderBookings();
+}
+
+function completeBookingPrompt(id) {
   const total = prompt("Enter total amount:");
-  if(total===null) return;
+  if(total === null) return;
   const paid = prompt("Enter amount paid:");
-  if(paid===null) return;
-  completeBooking(id,total,paid);
+  if(paid === null) return;
+  const notes = prompt("Add notes (optional):") || "";
+  completeBooking(id, total, paid, notes);
 }
-function completeBooking(id,total,paid){
-  const index = bookings.findIndex(b=>b.id===id);
-  if(index===-1) return;
-  saveCompletedService(bookings[index].client, bookings[index].service, bookings[index].date, total, paid, "Booking");
+
+function completeBooking(id, total, paid, notes="") {
+  const index = bookings.findIndex(b => b.id === id);
+  if (index === -1) return;
+  const b = bookings[index];
+  saveCompletedService(b.client, b.service, b.date, total, paid, "Booking", notes);
   bookings.splice(index,1);
   saveData();
   renderBookings();
 }
+
 function cancelBooking(id){
-  const index = bookings.findIndex(b=>b.id===id);
-  if(index===-1) return;
+  const index = bookings.findIndex(b => b.id === id);
+  if(index === -1) return;
   if(confirm(`Cancel booking for ${bookings[index].client}?`)){
-    bookings[index].status="Cancelled";
+    bookings[index].status = "Cancelled";
     saveData();
     renderBookings();
   }
 }
-function postponeBooking(id){
-  const index = bookings.findIndex(b=>b.id===id);
-  if(index===-1) return;
-  const newDate=prompt("Enter new date & time (YYYY-MM-DD HH:MM):");
-  if(!newDate) return;
-  bookings[index].date=newDate;
-  bookings[index].status="Postponed";
+
+function postponeBooking(id) {
+  const booking = bookings.find(b => b.id === id);
+  if (!booking) return;
+  const newDate = prompt("Enter new date & time (YYYY-MM-DD HH:MM):", booking.date);
+  if (!newDate) return;
+  booking.date = newDate;
+  booking.status = "Postponed";
   saveData();
   renderBookings();
-  alert(`Booking for ${bookings[index].client} postponed to ${newDate}`);
 }
 
-/* =====================
-   ===== WALK-IN =====
-===================== */
-function addWalkIn(client, service, total, paid){
-  saveCompletedService(client,service,new Date().toISOString().split("T")[0],total,paid,"Walk-in");
+/* ===== WALK-IN ===== */
+function addWalkIn(client, service, total, paid, notes="") {
+  saveCompletedService(client, service, new Date().toISOString().split("T")[0], total, paid, "Walk-in", notes);
 }
 
-/* =====================
-   ===== COMPLETED SERVICES =====
-===================== */
-function saveCompletedService(client, service, date, total, paid, type){
-  const totalAmount=Number(total)||0;
-  const amountPaid=Number(paid)||0;
-  completedServices.push({client,service,date,type,totalAmount,amountPaid,unpaidAmount:Math.max(0,totalAmount-amountPaid)});
+/* ===== COMPLETED SERVICES ===== */
+function saveCompletedService(client, service, date, total, paid, type, notes="") {
+  const totalAmount = Number(total) || 0;
+  const amountPaid = Number(paid) || 0;
+  completedServices.push({
+    id: Date.now(),
+    client,
+    service,
+    date,
+    type,
+    totalAmount,
+    amountPaid,
+    unpaidAmount: Math.max(0, totalAmount - amountPaid),
+    notes,
+    payments: amountPaid < totalAmount ? [{date: new Date().toISOString().split("T")[0], amount: amountPaid}] : []
+  });
   saveData();
   renderCompletedServices();
   updateSummaries();
@@ -159,14 +162,44 @@ function saveCompletedService(client, service, date, total, paid, type){
   drawTopServicesChart();
 }
 
-/* =====================
-   ===== RENDER TABLES =====
-===================== */
+function editCompletedService(id){
+  const service = completedServices.find(s => s.id === id);
+  if(!service) return;
+  const total = prompt("Edit total amount:", service.totalAmount) || service.totalAmount;
+  const paid = prompt("Edit amount paid:", service.amountPaid) || service.amountPaid;
+  const notes = prompt("Edit notes:", service.notes) || service.notes;
+  service.totalAmount = Number(total);
+  if(paid != service.amountPaid) {
+    const amountPaid = Number(paid);
+    service.amountPaid = amountPaid;
+    service.unpaidAmount = Math.max(0, service.totalAmount - service.amountPaid);
+    service.payments.push({date:new Date().toISOString().split("T")[0], amount: amountPaid});
+  }
+  service.notes = notes;
+  saveData();
+  renderCompletedServices();
+  updateSummaries();
+  drawIncomeChart();
+}
+
+function deleteCompletedService(id){
+  const index = completedServices.findIndex(s => s.id === id);
+  if(index === -1) return;
+  if(confirm("Delete this completed service?")){
+    completedServices.splice(index,1);
+    saveData();
+    renderCompletedServices();
+    updateSummaries();
+    drawIncomeChart();
+  }
+}
+
+/* ===== RENDER ===== */
 function renderBookings(){
   const table=document.getElementById("bookingTable").querySelector("tbody");
   table.innerHTML="";
   bookings.forEach(b=>{
-    const row=document.createElement("tr");
+    const row = document.createElement("tr");
     row.innerHTML=`
       <td>${b.client}</td>
       <td>${b.service}</td>
@@ -174,21 +207,32 @@ function renderBookings(){
       <td>${b.status}</td>
       <td>
         ${b.status==="Active"?`<button onclick="completeBookingPrompt(${b.id})">Complete</button>`:""}
+        <button onclick="editBooking(${b.id})">Edit</button>
         ${b.status!=="Completed"?`<button onclick="cancelBooking(${b.id})">Cancel</button>`:""}
         ${b.status==="Active"?`<button onclick="postponeBooking(${b.id})">Postpone</button>`:""}
+        <button onclick="deleteBooking(${b.id})">Delete</button>
       </td>
+      <td><input type="text" value="${b.notes}" readonly></td>
     `;
-    if(b.status==="Cancelled") row.style.backgroundColor="rgba(255,0,0,0.1)";
-    if(b.status==="Postponed") row.style.backgroundColor="rgba(255,255,0,0.1)";
     table.appendChild(row);
   });
+}
+
+function deleteBooking(id){
+  const index = bookings.findIndex(b => b.id===id);
+  if(index===-1) return;
+  if(confirm("Delete this booking?")) {
+    bookings.splice(index,1);
+    saveData();
+    renderBookings();
+  }
 }
 
 function renderCompletedServices(){
   const table=document.getElementById("completedTable").querySelector("tbody");
   table.innerHTML="";
   completedServices.forEach(s=>{
-    const row=document.createElement("tr");
+    const row = document.createElement("tr");
     row.innerHTML=`
       <td>${s.client}</td>
       <td>${s.service}</td>
@@ -197,41 +241,52 @@ function renderCompletedServices(){
       <td>${s.totalAmount}</td>
       <td>${s.amountPaid}</td>
       <td>${s.unpaidAmount}</td>
-      <td><button onclick='generateReceipt(${JSON.stringify(s)})'>Receipt</button></td>
+      <td>${s.notes}</td>
+      <td>${s.payments.map(p=>`${p.date}: ${p.amount}`).join("<br>")}</td>
+      <td>
+        <button onclick="editCompletedService(${s.id})">Edit</button>
+        <button onclick="deleteCompletedService(${s.id})">Delete</button>
+        <button onclick='generateReceipt(${JSON.stringify(s)})'>Receipt</button>
+      </td>
     `;
     table.appendChild(row);
   });
 }
 
-/* =====================
-   ===== SUMMARIES =====
-===================== */
+/* ===== INCOME SUMMARIES ===== */
 function updateSummaries(){
   let daily={}, weekly={}, monthly={}, yearly={};
+  let dailyUnpaid=0, weeklyUnpaid=0, monthlyUnpaid=0, yearlyUnpaid=0;
   completedServices.forEach(s=>{
     const d=parseDate(s.date);
-    daily[s.date]=(daily[s.date]||0)+s.amountPaid;
-    weekly[`${d.getFullYear()}-W${getWeekNumber(d)}`]=(weekly[`${d.getFullYear()}-W${getWeekNumber(d)}`]||0)+s.amountPaid;
-    monthly[`${d.getFullYear()}-${d.getMonth()+1}`]=(monthly[`${d.getFullYear()}-${d.getMonth()+1}`]||0)+s.amountPaid;
-    yearly[d.getFullYear()]=(yearly[d.getFullYear()]||0)+s.amountPaid;
+    const keyW = `${d.getFullYear()}-W${getWeekNumber(d)}`;
+    const keyM = `${d.getFullYear()}-${d.getMonth()+1}`;
+    daily[s.date] = (daily[s.date]||0)+s.amountPaid;
+    weekly[keyW] = (weekly[keyW]||0)+s.amountPaid;
+    monthly[keyM] = (monthly[keyM]||0)+s.amountPaid;
+    yearly[d.getFullYear()] = (yearly[d.getFullYear()]||0)+s.amountPaid;
+
+    dailyUnpaid += s.unpaidAmount;
+    weeklyUnpaid += s.unpaidAmount;
+    monthlyUnpaid += s.unpaidAmount;
+    yearlyUnpaid += s.unpaidAmount;
   });
-  document.getElementById("dailyTotal").innerText=sum(daily);
-  document.getElementById("weeklyTotal").innerText=sum(weekly);
-  document.getElementById("monthlyTotal").innerText=sum(monthly);
-  document.getElementById("yearlyTotal").innerText=sum(yearly);
+
+  document.getElementById("dailyTotal").innerText = sum(daily) + " (Unpaid: "+dailyUnpaid+")";
+  document.getElementById("weeklyTotal").innerText = sum(weekly) + " (Unpaid: "+weeklyUnpaid+")";
+  document.getElementById("monthlyTotal").innerText = sum(monthly) + " (Unpaid: "+monthlyUnpaid+")";
+  document.getElementById("yearlyTotal").innerText = sum(yearly) + " (Unpaid: "+yearlyUnpaid+")";
 }
+
 function sum(obj){ return Object.values(obj).reduce((a,b)=>a+b,0); }
 
-/* =====================
-   ===== TOP SERVICES =====
-===================== */
+/* ===== TOP SERVICES ===== */
 function getTopServices(period="all"){
   const counts={};
-  completedServices.forEach(s=>{
-    counts[s.service]=(counts[s.service]||0)+1;
-  });
+  completedServices.forEach(s=>{ counts[s.service]=(counts[s.service]||0)+1; });
   return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
 }
+
 function renderTopServices(){
   const list=document.getElementById("topServicesList");
   const top=getTopServices();
@@ -239,9 +294,7 @@ function renderTopServices(){
   top.forEach(s=>list.innerHTML+=`<li>${s[0]} — ${s[1]} bookings</li>`);
 }
 
-/* =====================
-   ===== CHARTS =====
-===================== */
+/* ===== CHARTS ===== */
 let incomeChart, topServicesChart;
 function drawIncomeChart(){
   const ctx=document.getElementById("incomeChart").getContext("2d");
@@ -250,9 +303,10 @@ function drawIncomeChart(){
   if(incomeChart) incomeChart.destroy();
   incomeChart = new Chart(ctx,{
     type:'line',
-    data:{labels,datasets:[{label:'Income',data,borderColor:'gold',backgroundColor:'rgba(255,215,0,0.2)'}]}
+    data:{labels, datasets:[{label:'Income', data, borderColor:'gold', backgroundColor:'rgba(255,215,0,0.2)'}]}
   });
 }
+
 function drawTopServicesChart(){
   const ctx=document.getElementById("topServicesChart").getContext("2d");
   const top = getTopServices();
@@ -263,11 +317,9 @@ function drawTopServicesChart(){
   });
 }
 
-/* =====================
-   ===== RECEIPT =====
-===================== */
+/* ===== RECEIPT ===== */
 function generateReceipt(service){
-  const win=window.open('','_blank');
+  const win = window.open('', '_blank');
   win.document.write(`<h1>Receipt</h1>
   <p>Client: ${service.client}</p>
   <p>Service: ${service.service}</p>
@@ -276,28 +328,30 @@ function generateReceipt(service){
   <p>Total: ${service.totalAmount}</p>
   <p>Paid: ${service.amountPaid}</p>
   <p>Unpaid: ${service.unpaidAmount}</p>
+  <p>Notes: ${service.notes}</p>
+  <p>Payments: ${service.payments.map(p=>p.date+": "+p.amount).join(", ")}</p>
   <script>window.print();</script>`);
 }
 
-/* =====================
-   ===== PDF EXPORT =====
-===================== */
-document.getElementById("exportPDF").addEventListener("click",()=>{
-  const element=document.querySelector(".content-wrapper");
-  const opt={
-    margin:0.5,
-    filename:`Spa_Report_${new Date().toISOString().split("T")[0]}.pdf`,
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2},
-    jsPDF:{unit:'in',format:'a4',orientation:'portrait'}
-  };
+/* ===== PDF EXPORT ===== */
+document.getElementById("exportPDF").addEventListener("click", () => {
+  const element = document.querySelector(".content-wrapper");
+  const opt = {margin:0.5, filename:`Spa_Report_${new Date().toISOString().split("T")[0]}.pdf`,
+    image:{type:'jpeg', quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in', format:'a4', orientation:'portrait'}};
   html2pdf().set(opt).from(element).save();
 });
 
-/* =====================
-   ===== FORM SUBMISSIONS =====
-===================== */
-document.getElementById("bookingForm").addEventListener("submit", e=>{
+/* ===== INIT ===== */
+if(JSON.parse(localStorage.getItem("loggedAdmin"))) showDashboard();
+renderBookings();
+renderCompletedServices();
+updateSummaries();
+renderTopServices();
+drawIncomeChart();
+drawTopServicesChart();
+
+/* ===== FORM SUBMISSIONS ===== */
+document.getElementById("bookingForm")?.addEventListener("submit", e=>{
   e.preventDefault();
   addBooking(
     document.getElementById("clientName").value,
@@ -306,7 +360,8 @@ document.getElementById("bookingForm").addEventListener("submit", e=>{
   );
   e.target.reset();
 });
-document.getElementById("walkInForm").addEventListener("submit", e=>{
+
+document.getElementById("walkInForm")?.addEventListener("submit", e=>{
   e.preventDefault();
   addWalkIn(
     document.getElementById("walkClient").value,
@@ -316,3 +371,16 @@ document.getElementById("walkInForm").addEventListener("submit", e=>{
   );
   e.target.reset();
 });
+
+/* ===== LOGIN & PROFILE ===== */
+document.getElementById("loginForm")?.addEventListener("submit", e=>{
+  e.preventDefault();
+  const username = document.getElementById("adminUsername").value;
+  const password = document.getElementById("adminPassword").value;
+  const remember = document.getElementById("rememberMe").checked;
+  if(loginAdmin(username,password,remember)) alert("Logged in!"); 
+  else alert("Incorrect credentials");
+});
+
+document.getElementById("logoutBtn")?.addEventListener("click", logoutAdmin);
+document.getElementById("deleteAccountBtn")?.addEventListener("click", deleteAdminAccount);
