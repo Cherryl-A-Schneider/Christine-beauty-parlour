@@ -7,16 +7,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#c9a24d">
 
-  <!-- PWA Manifest -->
+  <!-- Manifest for PWA -->
   <link rel="manifest" href="./manifest.json">
 
   <!-- Favicon -->
   <link rel="icon" href="./icons/spa-icon-192.png" type="image/png">
 
-  <!-- Styles -->
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="./style.css">
 
-  <!-- Libraries -->
+  <!-- Charts & PDF -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -27,6 +27,9 @@
 
     <!-- INSTALL BUTTON -->
     <button id="installBtn" hidden>Install App</button>
+
+    <!-- CLEAR ALL DATA -->
+    <button id="clearAllBtn">Clear All Data</button>
 
     <!-- ADD BOOKING FORM -->
     <form id="bookingForm">
@@ -62,7 +65,7 @@
       <tbody></tbody>
     </table>
 
-    <!-- COMPLETED SERVICES -->
+    <!-- COMPLETED SERVICES TABLE -->
     <h2>Completed Services</h2>
     <table id="completedTable">
       <thead>
@@ -74,14 +77,14 @@
           <th>Total</th>
           <th>Paid</th>
           <th>Unpaid</th>
-          <th>Receipt</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
 
-    <!-- INCOME SUMMARY -->
-    <h2>Income Summary</h2>
+    <!-- INCOME SUMMARIES -->
+    <h2>Income Summaries</h2>
     <div id="summary">
       <p>Daily Total: <span id="dailyTotal">0</span></p>
       <p>Weekly Total: <span id="weeklyTotal">0</span></p>
@@ -95,24 +98,24 @@
 
     <!-- CHARTS -->
     <h2>Income Chart</h2>
-    <canvas id="incomeChart" height="150"></canvas>
+    <canvas id="incomeChart" width="400" height="150"></canvas>
 
     <h2>Top Services Chart</h2>
-    <canvas id="topServicesChart" height="150"></canvas>
+    <canvas id="topServicesChart" width="400" height="150"></canvas>
 
-    <!-- EXPORT -->
+    <!-- EXPORT PDF -->
     <button id="exportPDF">Export Dashboard as PDF</button>
   </div>
 
-  <!-- APP SCRIPT -->
+  <!-- Main App Script -->
   <script src="./app.js"></script>
 
-  <!-- SERVICE WORKER + INSTALL -->
+  <!-- Service Worker & PWA install prompt -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registered'))
+          .then(reg => console.log('Service Worker registered:', reg))
           .catch(err => console.error('Service Worker failed:', err));
       });
     }
@@ -120,7 +123,7 @@
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
-    window.addEventListener('beforeinstallprompt', e => {
+    window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       installBtn.hidden = false;
@@ -128,8 +131,13 @@
 
     installBtn.addEventListener('click', () => {
       installBtn.hidden = true;
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.finally(() => deferredPrompt = null);
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choiceResult => {
+          console.log('User choice:', choiceResult.outcome);
+          deferredPrompt = null;
+        });
+      }
     });
   </script>
 </body>
