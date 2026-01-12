@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Christine’s Beauty Parlour</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#c9a24d">
 
@@ -27,9 +26,6 @@
 
     <!-- INSTALL BUTTON -->
     <button id="installBtn" hidden>Install App</button>
-
-    <!-- CLEAR ALL DATA -->
-    <button id="clearAllBtn">Clear All Data</button>
 
     <!-- ADD BOOKING FORM -->
     <form id="bookingForm">
@@ -74,9 +70,10 @@
           <th>Service</th>
           <th>Date</th>
           <th>Type</th>
-          <th>Total</th>
-          <th>Paid</th>
-          <th>Unpaid</th>
+          <th>Total Amount</th>
+          <th>Payments</th>
+          <th>Remaining</th>
+          <th>Notes</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -110,7 +107,7 @@
   <!-- Main App Script -->
   <script src="./app.js"></script>
 
-  <!-- Service Worker & PWA install prompt -->
+  <!-- Service Worker Registration & PWA Install -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -120,6 +117,7 @@
       });
     }
 
+    // PWA install prompt
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
