@@ -59,6 +59,7 @@
         <input type="text" id="clientName" placeholder="Client Name" required>
         <input type="text" id="serviceName" placeholder="Service" required>
         <input type="datetime-local" id="bookingDate" required>
+        <input type="text" id="bookingNotes" placeholder="Notes (optional)">
         <button type="submit">Add Booking</button>
       </form>
 
@@ -69,6 +70,7 @@
         <input type="text" id="walkService" placeholder="Service" required>
         <input type="number" id="walkTotal" placeholder="Total Amount" required>
         <input type="number" id="walkPaid" placeholder="Amount Paid" required>
+        <input type="text" id="walkNotes" placeholder="Notes (optional)">
         <button type="submit">Add Walk-In</button>
       </form>
 
@@ -82,6 +84,7 @@
             <th>Date</th>
             <th>Status</th>
             <th>Actions</th>
+            <th>Notes</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -99,7 +102,9 @@
             <th>Total</th>
             <th>Paid</th>
             <th>Unpaid</th>
-            <th>Receipt</th>
+            <th>Notes</th>
+            <th>Payments (with dates)</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody></tbody>
