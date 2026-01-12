@@ -1,13 +1,14 @@
 {
-  "name": "Spa Management System",
+  "name": "Christine’s Beauty Parlour Management System",
   "short_name": "SpaApp",
+  "version": "1.0.1",
+  "description": "Manage bookings, walk-ins, and income for Christine’s beauty parlour efficiently. Admin login, reports, charts, and PWA install ready.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#001d3d",
   "theme_color": "#c9a24d",
   "orientation": "portrait",
   "scope": "./",
-  "description": "A Progressive Web App for Christine's Beauty Parlour to track appointments, walk-ins, completed services, and income reports on any device.",
   "icons": [
     {
       "src": "./icons/spa-icon-192.png",
