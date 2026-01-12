@@ -21,6 +21,13 @@
 </head>
 
 <body>
+  <!-- CREATE ADMIN FORM -->
+  <div id="createAdminDiv"></div>
+
+  <!-- LOGIN FORM -->
+  <div id="loginDiv"></div>
+
+  <!-- DASHBOARD -->
   <div class="content-wrapper">
     <h1>Christine’s Beauty Parlour</h1>
 
@@ -70,11 +77,10 @@
           <th>Service</th>
           <th>Date</th>
           <th>Type</th>
-          <th>Total Amount</th>
-          <th>Payments</th>
-          <th>Remaining</th>
-          <th>Notes</th>
-          <th>Actions</th>
+          <th>Total</th>
+          <th>Paid</th>
+          <th>Unpaid</th>
+          <th>Receipt</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -120,7 +126,6 @@
     // PWA install prompt
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
-
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
